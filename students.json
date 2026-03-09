@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1773052307280,
+    "rollNo": "3435",
+    "name": "dhurandhar",
+    "marks": {
+      "math": 54,
+      "science": 99,
+      "english": 79,
+      "history": 99
+    },
+    "total": 331,
+    "percentage": 82.75,
+    "gpa": "3.5",
+    "status": "Pass"
+  },
+  {
+    "id": 1773053181497,
+    "rollNo": "r1002",
+    "name": "rohan",
+    "marks": {
+      "math": 99,
+      "science": 77,
+      "english": 90,
+      "history": 88
+    },
+    "total": 354,
+    "percentage": 88.5,
+    "gpa": "3.5",
+    "status": "Pass"
+  }
+]

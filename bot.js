@@ -13,7 +13,7 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
   polling: !isRender
 });
 
-// Start polling safely on Render
+// Prevent Telegram polling conflicts
 if (isRender) {
   bot.deleteWebHook().then(() => {
     bot.startPolling();
@@ -45,50 +45,54 @@ app.post('/sync-students', (req, res) => {
   res.json({ success: true });
 });
 
-// Get student data
+// Get students
 app.get('/students', (req, res) => {
   res.json(students);
 });
 
 // Health check
 app.get('/', (req, res) => {
-  res.send("GradeSync AI Bot is running 🤖");
+  res.send("GradeSync AI Bot API is running 🤖");
 });
 
-// Use Render port
+// Catch-all route (fixes Cannot GET errors)
+app.get('*', (req, res) => {
+  res.send("GradeSync AI Bot API is running 🤖");
+});
+
+// Use Render dynamic port
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Telegram commands
+// Telegram /start command
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
 
   bot.sendMessage(
     chatId,
-    `Welcome to GradeSync AI Bot 📚
+`Welcome to GradeSync AI Bot 📚
 
 Ask things like:
-• "How is Rohan doing?"
-• "Class stats"
-• "Top students"`
+• How is Rohan doing?
+• Class stats
+• Top students`
   );
 });
 
+// Help command
 bot.onText(/\/help/, (msg) => {
   const chatId = msg.chat.id;
 
-  bot.sendMessage(
-    chatId,
+  bot.sendMessage(chatId,
 `Available commands:
 
 • How is [Student Name] doing?
 • Class stats
 • Top students
-• Sync data`
-  );
+• Sync data`);
 });
 
 // Main message handler
@@ -133,17 +137,15 @@ bot.on('message', async (msg) => {
 `I didn't understand that.
 
 Try:
-• "How is Rohan doing?"
-• "Class stats"
-• "Top students"
+• How is Rohan doing?
+• Class stats
+• Top students
 • /help`);
 
     }
 
   } catch (error) {
-
     console.error('Message handler error:', error);
-
   }
 });
 
@@ -168,10 +170,9 @@ function extractStudentName(message) {
   }
 
   return null;
-
 }
 
-// AI student analysis
+// AI analysis
 async function getStudentAnalysis(studentName) {
 
   const student = students.find(
@@ -195,8 +196,7 @@ History: ${student.marks.history}
 GPA: ${student.gpa}
 Status: ${student.status}
 
-Give constructive feedback and improvement suggestions.`;
-
+Provide constructive feedback and improvement suggestions.`;
 
   try {
 
@@ -206,7 +206,7 @@ Give constructive feedback and improvement suggestions.`;
       messages: [{ role: "user", content: prompt }]
     });
 
-    return `📊 *${student.name}'s Analysis*\n\n${response.content[0].text}`;
+    return `📊 *${student.name}'s Performance Analysis*\n\n${response.content[0].text}`;
 
   } catch (error) {
 
@@ -219,38 +219,9 @@ Total Score: ${student.total}/400
 Status: ${student.status}`;
 
   }
-
 }
 
-// Strong subjects
-function getStrongSubjects(student) {
-
-  const subjects = [];
-
-  if (student.marks.math >= 80) subjects.push('Math');
-  if (student.marks.science >= 80) subjects.push('Science');
-  if (student.marks.english >= 80) subjects.push('English');
-  if (student.marks.history >= 80) subjects.push('History');
-
-  return subjects.join(', ') || 'None';
-
-}
-
-// Weak subjects
-function getWeakSubjects(student) {
-
-  const subjects = [];
-
-  if (student.marks.math < 70) subjects.push('Math');
-  if (student.marks.science < 70) subjects.push('Science');
-  if (student.marks.english < 70) subjects.push('English');
-  if (student.marks.history < 70) subjects.push('History');
-
-  return subjects.join(', ') || 'None';
-
-}
-
-// Class statistics
+// Class stats
 function getClassStats() {
 
   if (students.length === 0) return 'No student data available.';
@@ -273,7 +244,7 @@ Average Score: ${avgTotal.toFixed(1)}/400`;
 
 }
 
-// Top performers
+// Top students
 function getTopStudents() {
 
   if (students.length === 0) return 'No student data available.';
